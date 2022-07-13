@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./feederfactory.sol";
+import "./FeederFactory.sol";
 
 contract KittyInterface {
   function getKitty(uint256 _id) external view returns (
@@ -19,24 +19,37 @@ contract KittyInterface {
 
 contract FeederFeeding is FeederFactory {
 
-  address ckAddress = 0x06012c8cf97BEaD5deAe237070F9587f8E7A266d;
-  KittyInterface kittyContract = KittyInterface(ckAddress);
+  KittyInterface kittyContract;
 
-  // Modify function definition here:
-  function feedAndMultiply(uint _feederId, uint _targetDna) public {
-    require(msg.sender == zombieToOwner[_feederId]);
-    Feeder storage myFeeder = zombies[_feederId];
-    _targetDna = _targetDna % dnaModulus;
-    uint newDna = (myFeeder.dna + _targetDna) / 2;
-    // Add an if statement here
-    _createFeeder("NoName", newDna);
+  function setKittyContractAddress(address _address) external onlyOwner {
+    kittyContract = KittyInterface(_address);
   }
 
-  function feedOnKitty(uint _zombieId, uint _kittyId) public {
+  function _triggerCooldown(Feeder storage _zombie) internal {
+    _feeder.readyTime = uint32(now + cooldownTime);
+  }
+
+  function _isReady(Feeder storage _feeder) internal view returns (bool) {
+      return (_feeder.readyTime <= now);
+  }
+
+  function feedAndMultiply(uint _feederId, uint _targetDna, string memory _species) internal {
+    require(msg.sender == zombieToOwner[_feederId]);
+    Zombie storage myFeeder = zombies[_feederId];
+    require(_isReady(myFeeder));
+    _targetDna = _targetDna % dnaModulus;
+    uint newDna = (myFeeder.dna + _targetDna) / 2;
+    if (keccak256(abi.encodePacked(_species)) == keccak256(abi.encodePacked("kitty"))) {
+      newDna = newDna - newDna % 100 + 99;
+    }
+    _createFeeder("NoName", newDna);
+    _triggerCooldown(myFeeder);
+  }
+
+  function feedOnKitty(uint _feederId, uint _kittyId) public {
     uint kittyDna;
     (,,,,,,,,,kittyDna) = kittyContract.getKitty(_kittyId);
-    // And modify function call here:
-    feedAndMultiply(_feederId, kittyDna);
+    feedAndMultiply(_feederId, kittyDna, "kitty");
   }
 
 }
