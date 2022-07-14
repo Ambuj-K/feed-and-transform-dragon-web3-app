@@ -25,7 +25,7 @@ contract DragonFeeding is DragonFactory {
     kittyContract = KittyInterface(_address);
   }
 
-  function _triggerCooldown(Dragon storage _zombie) internal {
+  function _triggerCooldown(Dragon storage _dragon) internal {
     _feeder.readyTime = uint32(now + cooldownTime);
   }
 
@@ -34,8 +34,8 @@ contract DragonFeeding is DragonFactory {
   }
 
   function feedAndMultiply(uint _feederId, uint _targetDna, string memory _species) internal {
-    require(msg.sender == zombieToOwner[_feederId]);
-    Zombie storage myDragon = zombies[_feederId];
+    require(msg.sender == dragonToOwner[_feederId]);
+    Dragon storage myDragon = zombies[_feederId];
     require(_isReady(myDragon));
     _targetDna = _targetDna % dnaModulus;
     uint newDna = (myDragon.dna + _targetDna) / 2;
