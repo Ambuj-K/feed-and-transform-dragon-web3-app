@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./FeederFactory.sol";
+import "./DragonFactory.sol";
 
 contract KittyInterface {
   function getKitty(uint256 _id) external view returns (
@@ -17,7 +17,7 @@ contract KittyInterface {
   );
 }
 
-contract FeederFeeding is FeederFactory {
+contract DragonFeeding is DragonFactory {
 
   KittyInterface kittyContract;
 
@@ -25,25 +25,25 @@ contract FeederFeeding is FeederFactory {
     kittyContract = KittyInterface(_address);
   }
 
-  function _triggerCooldown(Feeder storage _zombie) internal {
+  function _triggerCooldown(Dragon storage _zombie) internal {
     _feeder.readyTime = uint32(now + cooldownTime);
   }
 
-  function _isReady(Feeder storage _feeder) internal view returns (bool) {
+  function _isReady(Dragon storage _feeder) internal view returns (bool) {
       return (_feeder.readyTime <= now);
   }
 
   function feedAndMultiply(uint _feederId, uint _targetDna, string memory _species) internal {
     require(msg.sender == zombieToOwner[_feederId]);
-    Zombie storage myFeeder = zombies[_feederId];
-    require(_isReady(myFeeder));
+    Zombie storage myDragon = zombies[_feederId];
+    require(_isReady(myDragon));
     _targetDna = _targetDna % dnaModulus;
-    uint newDna = (myFeeder.dna + _targetDna) / 2;
+    uint newDna = (myDragon.dna + _targetDna) / 2;
     if (keccak256(abi.encodePacked(_species)) == keccak256(abi.encodePacked("kitty"))) {
       newDna = newDna - newDna % 100 + 99;
     }
-    _createFeeder("NoName", newDna);
-    _triggerCooldown(myFeeder);
+    _createDragon("NoName", newDna);
+    _triggerCooldown(myDragon);
   }
 
   function feedOnKitty(uint _feederId, uint _kittyId) public {
