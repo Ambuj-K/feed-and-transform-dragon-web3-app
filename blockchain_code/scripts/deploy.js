@@ -5,13 +5,13 @@ const main = async () => {
     console.log("Deploying contracts with account: ", deployer.address);
     console.log("Account balance: ", accountBalance.toString());
   
-    const feederContractFactory = await hre.ethers.getContractFactory("FeederPortal");
-    const feederContract = await feederContractFactory.deploy({
+    const dragonContractFactory = await hre.ethers.getContractFactory("DragonPortal");
+    const dragonContract = await dragonContractFactory.deploy({
       value: hre.ethers.utils.parseEther("0.001"),
     });
-    await feederContract.deployed();
+    await dragonContract.deployed();
   
-    console.log("FeederPortal address: ", feederContract.address);
+    console.log("DragonPortal address: ", dragonContract.address);
   };
   
   const runMain = async () => {
