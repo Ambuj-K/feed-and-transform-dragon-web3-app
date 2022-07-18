@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "./DragonFeeding.sol";
+import "./DragonFeeder.sol";
 
 contract DragonHelper is DragonFeeding {
 
