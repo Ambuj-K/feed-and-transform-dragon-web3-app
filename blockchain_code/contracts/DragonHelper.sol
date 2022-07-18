@@ -25,13 +25,11 @@ contract DragonHelper is DragonFeeding {
     dragons[_dragonId].level++;
   }
 
-  function changeName(uint _dragonId, string calldata _newName) external aboveLevel(2, _dragonId) {
-    require(msg.sender == dragonToOwner[_dragonId]);
+  function changeName(uint _dragonId, string calldata _newName) external aboveLevel(2, _dragonId) ownerOf(_dragonId) {
     dragons[_dragonId].name = _newName;
   }
 
-  function changeDna(uint _dragonId, uint _newDna) external aboveLevel(20, _dragonId) {
-    require(msg.sender == dragonToOwner[_dragonId]);
+  function changeDna(uint _dragonId, uint _newDna) external aboveLevel(20, _dragonId) ownerOf(_dragonId) {
     dragons[_dragonId].dna = _newDna;
   }
 
