@@ -2,7 +2,7 @@ pragma solidity ^0.8.0;
 
 import "./DragonAttack.sol";
 import "./ERC721.sol";
-import "./Safemath.sol";
+import "./SafeMath.sol";
 
 /// @title A contract to transfer dragon ownership
 /// @author Ambuj Kumar
