@@ -20,6 +20,11 @@ contract KittyInterface {
 contract DragonFeeding is DragonFactory {
 
   KittyInterface kittyContract;
+  
+  modifier ownerOf(uint _dragonId) {
+    require(msg.sender == dragonToOwner[_dragonId]);
+    _;
+  }
 
   function setKittyContractAddress(address _address) external onlyOwner {
     kittyContract = KittyInterface(_address);
@@ -33,9 +38,8 @@ contract DragonFeeding is DragonFactory {
       return (_feeder.readyTime <= now);
   }
 
-  function feedAndMultiply(uint _feederId, uint _targetDna, string memory _species) internal {
-    require(msg.sender == dragonToOwner[_feederId]);
-    Dragon storage myDragon = zombies[_feederId];
+  function feedAndMultiply(uint _feederId, uint _targetDna, string memory _species) internal ownerOf(_dragonId) {
+    Dragon storage myDragon = dragons[_feederId];
     require(_isReady(myDragon));
     _targetDna = _targetDna % dnaModulus;
     uint newDna = (myDragon.dna + _targetDna) / 2;
