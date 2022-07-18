@@ -1,15 +1,22 @@
 pragma solidity ^0.8.0;
 
-contract DragonFactory {
+import "./ownable.sol";
+
+contract DragonFactory is Ownable {
 
     event NewDragon(uint dragonId, string name, uint dna);
 
     uint dnaDigits = 16;
     uint dnaModulus = 10 ** dnaDigits;
+    uint cooldownTime = 1 days;
 
     struct Dragon {
-        string name;
-        uint dna;
+      string name;
+      uint dna;
+      uint32 level;
+      uint32 readyTime;
+      uint16 winCount;
+      uint16 lossCount;
     }
 
     Dragon[] public dragons;
@@ -18,7 +25,7 @@ contract DragonFactory {
     mapping (address => uint) ownerDragonCount;
 
     function _createDragon(string memory _name, uint _dna) internal {
-        uint id = feeders.push(Dragon(_name, _dna)) - 1;
+        uint id = dragons.push(Dragon(_name, _dna, 1, uint32(now + cooldownTime), 0, 0)) - 1;
         dragonToOwner[id] = msg.sender;
         ownerDragonCount[msg.sender]++;
         emit NewDragon(id, _name, _dna);
