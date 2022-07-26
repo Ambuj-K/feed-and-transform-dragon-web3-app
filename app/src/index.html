@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>CryptoDragons front-end</title>
+    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script language="javascript" type="text/javascript" src="web3.min.js"></script>
+    <script language="javascript" type="text/javascript" src="dragons_abi.js"></script>
+  </head>
+  <body>
+    <div id="txStatus"></div>
+    <div id="dragons"></div>
+
+    <script>
+      var cryptoDragons;
+      var userAccount;
+
+      function startApp() {
+        var cryptoDragonsAddress = "YOUR_CONTRACT_ADDRESS";
+        cryptoDragons = new web3js.eth.Contract(cryptoDragonsABI, cryptoDragonsAddress);
+
+        var accountInterval = setInterval(function() {
+          // Check if account has changed
+          if (web3.eth.accounts[0] !== userAccount) {
+            userAccount = web3.eth.accounts[0];
+            // Call a function to update the UI with the new account
+            getDragonsByOwner(userAccount)
+            .then(displayDragons);
+          }
+        }, 100);
+
+        cryptoDragons.events.Transfer({ filter: { _to: userAccount } })
+        .on("data", function(event) {
+          let data = event.returnValues;
+          getDragonsByOwner(userAccount).then(displayDragons);
+        }).on("error", console.error);
+      }
+
+      function displayDragons(ids) {
+        $("#dragons").empty();
+        for (id of ids) {
+          // Look up dragon details from our contract. Returns a `dragon` object
+          getDragonDetails(id)
+          .then(function(dragon) {
+            // Using ES6's "template literals" to inject variables into the HTML.
+            // Append each one to our #dragons div
+            $("#dragons").append(`<div class="dragon">
+              <ul>
+                <li>Name: ${dragon.name}</li>
+                <li>DNA: ${dragon.dna}</li>
+                <li>Level: ${dragon.level}</li>
+                <li>Wins: ${dragon.winCount}</li>
+                <li>Losses: ${dragon.lossCount}</li>
+                <li>Ready Time: ${dragon.readyTime}</li>
+              </ul>
+            </div>`);
+          });
+        }
+      }
+
+      function createRandomDragon(name) {
+        // This is going to take a while, so update the UI to let the user know
+        // the transaction has been sent
+        $("#txStatus").text("Creating new dragon on the blockchain. This may take a while...");
+        // Send the tx to our contract:
+        return cryptoDragons.methods.createRandomDragon(name)
+        .send({ from: userAccount })
+        .on("receipt", function(receipt) {
+          $("#txStatus").text("Successfully created " + name + "!");
+          // Transaction was accepted into the blockchain, let's redraw the UI
+          getDragonsByOwner(userAccount).then(displayDragons);
+        })
+        .on("error", function(error) {
+          // Do something to alert the user their transaction has failed
+          $("#txStatus").text(error);
+        });
+      }
+
+      function feedOnKitty(dragonId, kittyId) {
+        $("#txStatus").text("Eating a kitty. This may take a while...");
+        return cryptoDragons.methods.feedOnKitty(dragonId, kittyId)
+        .send({ from: userAccount })
+        .on("receipt", function(receipt) {
+          $("#txStatus").text("Ate a kitty and spawned a new Dragon!");
+          getDragonsByOwner(userAccount).then(displayDragons);
+        })
+        .on("error", function(error) {
+          $("#txStatus").text(error);
+        });
+      }
+
+      function levelUp(dragonId) {
+        $("#txStatus").text("Leveling up your dragon...");
+        return cryptoDragons.methods.levelUp(dragonId)
+        .send({ from: userAccount, value: web3.utils.toWei("0.001", "ether") })
+        .on("receipt", function(receipt) {
+          $("#txStatus").text("Power overwhelming! Dragon successfully leveled up");
+        })
+        .on("error", function(error) {
+          $("#txStatus").text(error);
+        });
+      }
+
+      function getDragonDetails(id) {
+        return cryptoDragons.methods.dragons(id).call()
+      }
+
+      function dragonToOwner(id) {
+        return cryptoDragons.methods.dragonToOwner(id).call()
+      }
+
+      function getDragonsByOwner(owner) {
+        return cryptoDragons.methods.getDragonsByOwner(owner).call()
+      }
+
+      window.addEventListener('load', function() {
+
+        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+        if (typeof web3 !== 'undefined') {
+          // Use Mist/MetaMask's provider
+          web3js = new Web3(web3.currentProvider);
+        } else {
+          // Handle the case where the user doesn't have Metamask installed
+          // Probably show them a message prompting them to install Metamask
+        }
+
+        // Now you can start your app & access web3 freely:
+        startApp()
+
+      })
+    </script>
+  </body>
+</html>
