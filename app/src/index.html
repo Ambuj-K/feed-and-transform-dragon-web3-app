@@ -20,10 +20,10 @@
         cryptoDragons = new web3js.eth.Contract(cryptoDragonsABI, cryptoDragonsAddress);
 
         var accountInterval = setInterval(function() {
-          // Check if account has changed
+          // Checking if account has changed
           if (web3.eth.accounts[0] !== userAccount) {
             userAccount = web3.eth.accounts[0];
-            // Call a function to update the UI with the new account
+            // Calling a function to update the UI with the new account
             getDragonsByOwner(userAccount)
             .then(displayDragons);
           }
@@ -39,7 +39,7 @@
       function displayDragons(ids) {
         $("#dragons").empty();
         for (id of ids) {
-          // Look up dragon details from contract. Returns a `dragon` object
+          // Looking up dragon details from contract. Returning a `dragon` object
           getDragonDetails(id)
           .then(function(dragon) {
             // Using ES6's "template literals" to inject variables into the HTML.
@@ -61,16 +61,16 @@
       function createRandomDragon(name) {
         // Updating the UI to let the user know the transaction has been sent
         $("#txStatus").text("Creating new dragon on the blockchain. This may take a while...");
-        // Send the tx to our contract:
+        // Send the tx to this contract:
         return cryptoDragons.methods.createRandomDragon(name)
         .send({ from: userAccount })
         .on("receipt", function(receipt) {
           $("#txStatus").text("Successfully created " + name + "!");
-          // Transaction was accepted into the blockchain, let's redraw the UI
+          // Transaction was accepted into the blockchain, redo the UI
           getDragonsByOwner(userAccount).then(displayDragons);
         })
         .on("error", function(error) {
-          // Do something to alert the user their transaction has failed
+          console.log(error)
           $("#txStatus").text(error);
         });
       }
