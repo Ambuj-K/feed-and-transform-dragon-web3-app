@@ -39,11 +39,11 @@
       function displayDragons(ids) {
         $("#dragons").empty();
         for (id of ids) {
-          // Look up dragon details from our contract. Returns a `dragon` object
+          // Look up dragon details from contract. Returns a `dragon` object
           getDragonDetails(id)
           .then(function(dragon) {
             // Using ES6's "template literals" to inject variables into the HTML.
-            // Append each one to our #dragons div
+            // Append each one to #dragons div
             $("#dragons").append(`<div class="dragon">
               <ul>
                 <li>Name: ${dragon.name}</li>
@@ -59,8 +59,7 @@
       }
 
       function createRandomDragon(name) {
-        // This is going to take a while, so update the UI to let the user know
-        // the transaction has been sent
+        // Updating the UI to let the user know the transaction has been sent
         $("#txStatus").text("Creating new dragon on the blockchain. This may take a while...");
         // Send the tx to our contract:
         return cryptoDragons.methods.createRandomDragon(name)
@@ -117,14 +116,10 @@
 
         // Checking if Web3 has been injected by the browser (Mist/MetaMask)
         if (typeof web3 !== 'undefined') {
-          // Use Mist/MetaMask's provider
           web3js = new Web3(web3.currentProvider);
         } else {
-          // Handle the case where the user doesn't have Metamask installed
-          // Probably show them a message prompting them to install Metamask
+          console.log("please install metamask and login")
         }
-
-        // Now you can start your app & access web3 freely:
         startApp()
 
       })
